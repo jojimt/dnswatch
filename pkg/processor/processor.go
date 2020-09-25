@@ -5,6 +5,7 @@ import (
 	crdset "github.com/jojimt/dnswatch/pkg/crd/clientset/versioned"
 	crdseta1 "github.com/jojimt/dnswatch/pkg/crd/clientset/versioned/typed/dnswatch/v1alpha"
 	"k8s.io/client-go/kubernetes"
+	"github.com/sirupsen/logrus"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"sync"
@@ -70,6 +71,7 @@ func (ndb *NamesDB) Update(key, name string) (bool, bool) {
 	}
 
 	_, nameFound := db[name]
+	logrus.Debugf("Update: key: %s name: %s found: %v", key, name, nameFound)
 	if nameFound {
 		return false, false
 	}

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnswatch
+  namespace: kube-system
+  labels:
+    name: dnswatch
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: dnswatch
+  template:
+    metadata:
+      name: dnswatch
+      namespace: kube-system
+      labels:
+        name: dnswatch
+    spec:
+      serviceAccountName: dnswatcher
+      containers:
+        - name: dnswatch
+          image: jojimt/dnswatch
+          imagePullPolicy: Always

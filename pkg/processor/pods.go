@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/kubernetes/pkg/controller"
 	"reflect"
+	"strings"
 )
 
 func (p *Processor) initPodWatch() {
@@ -30,7 +31,7 @@ func (p *Processor) initPodWatch() {
 	)
 	p.podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			p.podUpdated(obj.(*v1.Pod))
+			p.podAdded(obj.(*v1.Pod))
 		},
 		UpdateFunc: func(_ interface{}, obj interface{}) {
 			p.podUpdated(obj.(*v1.Pod))
@@ -39,6 +40,18 @@ func (p *Processor) initPodWatch() {
 			p.podDeleted(obj.(*v1.Pod))
 		},
 	})
+}
+
+func (p *Processor) podAdded(pod *v1.Pod) {
+	if strings.Contains(pod.ObjectMeta.Name, "coredns") {
+		cvm := &dnsw.ClientViewMeta{
+			Name:      pod.ObjectMeta.Name,
+			Namespace: pod.ObjectMeta.Namespace,
+		}
+		p.dnsPodCh <- cvm
+	}
+
+	p.podUpdated(pod)
 }
 
 func (p *Processor) podUpdated(pod *v1.Pod) {

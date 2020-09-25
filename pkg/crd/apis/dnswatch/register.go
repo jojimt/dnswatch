@@ -1,5 +1,5 @@
 package dnswatch
 
 const (
-	GroupName = "dnswatch"
+	GroupName = "dnswatch.state"
 )

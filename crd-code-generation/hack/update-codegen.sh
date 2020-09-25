@@ -4,6 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+chmod +x vendor/k8s.io/code-generator/generate-groups.sh
 SCRIPT_ROOT=$(dirname ${PWD})
 
 vendor/k8s.io/code-generator/generate-groups.sh all \

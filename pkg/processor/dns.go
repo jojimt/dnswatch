@@ -33,9 +33,13 @@ func (p *Processor) watchLog(dnsPod *dnsw.ClientViewMeta) {
 			SinceSeconds: &lp,
 		}
 		rc, err := podClient.GetLogs(dnsPod.Name, logOpt).Stream(context.TODO())
-		if strings.Contains(err.Error(), "Not found") {
-			logrus.Infof("Pod %s exited", dnsPod.Name)
-			return
+		if err != nil {
+			if strings.Contains(err.Error(), "Not found") {
+				logrus.Infof("Pod %s exited", dnsPod.Name)
+				return
+			}
+			logrus.Errorf("Pod %s log error: %v", dnsPod.Name, err)
+			continue
 		}
 		defer rc.Close()
 		buf := new(bytes.Buffer)
@@ -94,7 +98,7 @@ func getIPName(line string) (string, string) {
 	getField := func(line, field string) string {
 		parts := strings.Split(line, field)
 		parts = strings.Split(parts[1], " ")
-		return parts[1]
+		return parts[0]
 	}
 	ip := getField(line, "Client: ")
 	name := getField(line, "Request: ")
@@ -102,5 +106,5 @@ func getIPName(line string) (string, string) {
 }
 
 func getKey(meta *dnsw.ClientViewMeta) string {
-	return fmt.Sprintf("%s.%s.%s", meta.Namespace, meta.Kind, meta.Name)
+	return fmt.Sprintf("%s.%s.%s", meta.Namespace, strings.ToLower(meta.Kind), meta.Name)
 }
